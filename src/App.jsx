@@ -1,19 +1,17 @@
-import { useEffect, useState } from 'react';
-
-function App() {
-  const [message, setMessage] = useState('');
-
-  useEffect(() => {
-    fetch('/api/test')
-      .then(res => res.json())
-      .then(data => setMessage(data.message));
-  }, []);
-
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import UserLogin from "./Pages/UserLogin"
+import UserRegister from './Pages/UserRegister';
+import Otp from './Pages/Otp';
+const App = () => {
   return (
-    <div className="text-xl font-bold p-4">
-      Backend says: {message}
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/login" element={<UserLogin />} />
+        <Route path="/register" element={<UserRegister />} />
+        <Route path="/forgot-password" element={<Otp />} />
+      </Routes>
+    </Router>
   );
-}
+};
 
 export default App;
