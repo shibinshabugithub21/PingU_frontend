@@ -1,7 +1,9 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link ,useNavigate} from "react-router-dom";
+import axios from "axios";
 
 const UserRegister = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     fullName: "",
     phone: "",
@@ -22,7 +24,6 @@ const UserRegister = () => {
 
   const validateForm = () => {
     const newErrors = {};
-
     if (!formData.fullName.trim()) newErrors.fullName = "Full name is required";
     if (!formData.phone.trim()) newErrors.phone = "Phone number is required";
     if (!formData.email.trim()) newErrors.email = "Email is required";
@@ -30,15 +31,31 @@ const UserRegister = () => {
     if (!formData.password) newErrors.password = "Password is required";
     else if (formData.password.length < 6) newErrors.password = "Password must be at least 6 characters";
     if (formData.password !== formData.retypePassword) newErrors.retypePassword = "Passwords do not match";
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      console.log("Registration data:", formData);
+      try {
+        const response = await axios.post("http://localhost:5000/register", formData);
+        console.log("Server Response:", response.data);
+        alert("Registration successful!");
+
+        // Reset form
+        setFormData({
+          fullName: "",
+          phone: "",
+          email: "",
+          password: "",
+          retypePassword: "",
+        });
+        navigate('/forget-password'); 
+      } catch (error) {
+        console.error("Registration error:", error.response?.data || error.message);
+        alert("Registration failed: " + (error.response?.data?.message || "Please try again."));
+      }
     }
   };
 
@@ -46,18 +63,15 @@ const UserRegister = () => {
     <div className="min-h-screen flex">
       {/* Logo Side */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-indigo-600 to-purple-700 relative overflow-hidden">
-        {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-32 h-32 border-2 border-white rounded-full"></div>
           <div className="absolute top-40 right-20 w-24 h-24 border-2 border-white rounded-full"></div>
           <div className="absolute bottom-32 left-20 w-40 h-40 border border-white rounded-full"></div>
           <div className="absolute bottom-10 right-10 w-28 h-28 border border-white rounded-full"></div>
         </div>
-
-        {/* Logo Container */}
         <div className="flex items-center justify-center w-full z-10 relative">
           <div className="text-center text-white">
-          <img
+            <img
               src="/src/assets/pinulogo.PNG"
               alt="PingU Logo"
               className="w-48 h-48 mx-auto mb-8 object-contain rounded-full border-4 border-white/30 bg-white/10 p-4"
@@ -75,7 +89,7 @@ const UserRegister = () => {
         <div className="bg-white p-8 lg:p-10 rounded-2xl shadow-xl w-full max-w-md">
           <h2 className="text-3xl font-bold text-center text-indigo-700 mb-8">Create an Account 🚀</h2>
 
-          <div className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {/* Full Name */}
             <div>
               <label className="block text-gray-700 mb-1 font-medium">Full Name</label>
@@ -153,18 +167,39 @@ const UserRegister = () => {
                 value={formData.retypePassword}
                 onChange={handleChange}
               />
-              {errors.retypePassword && <p className="text-red-500 text-sm mt-1">{errors.retypePassword}</p>}
+              {errors.retypePassword && (
+                <p className="text-red-500 text-sm mt-1">{errors.retypePassword}</p>
+              )}
             </div>
 
             {/* Submit Button */}
             <button
               type="submit"
-              onClick={handleSubmit}
               className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition duration-200 mt-6 shadow-lg hover:shadow-xl"
             >
               Register
             </button>
+          </form>
+
+          {/* Divider */}
+          <div className="flex items-center gap-4 my-4">
+            <hr className="flex-grow border-gray-300" />
+            <span className="text-gray-500 text-sm">or</span>
+            <hr className="flex-grow border-gray-300" />
           </div>
+
+          {/* Google Sign-In */}
+          <button
+            type="button"
+            className="w-full flex items-center justify-center gap-3 border border-gray-300 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-100 transition duration-200"
+          >
+            <img
+              src="https://www.svgrepo.com/show/475656/google-color.svg"
+              alt="Google Logo"
+              className="w-5 h-5"
+            />
+            Sign up with Google
+          </button>
 
           <p className="mt-6 text-center text-sm text-gray-600">
             Already have an account?{" "}
